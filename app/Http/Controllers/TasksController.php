@@ -108,7 +108,7 @@ class TasksController extends Controller
         $task->save();
         
         return redirect('/');
-    }
+    } 
 
     /**
      * Remove the specified resource from storage.
