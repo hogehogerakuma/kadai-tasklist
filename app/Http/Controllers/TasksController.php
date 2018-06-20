@@ -15,11 +15,22 @@ class TasksController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
-        
-        return view('tasks.index', [
-            'tasks' => $tasks,
-            ]);
+         $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+            //$tasks = null;
+            // var_dump($tasks);
+            // exit;
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+                ];
+            $data += $this->counts($user);
+            return view('tasks.index', $data);
+        }else {
+            return view('welcome');
+        }
     }
 
     /**
@@ -49,11 +60,17 @@ class TasksController extends Controller
             'content' => 'required|max:10',
             ]);
         
+        
         $task = new Task;
         $task->status = $request->status;
         $task->content = $request->content;
+        $task->user_id = \Auth::user()->id;
         $task->save();
-        
+/*
+        \Auth::user()->tasks()->create([
+            "status" =>$request->status,
+            "content" => $request->content
+            ]);        */
         return redirect('/');
        
     }
@@ -66,11 +83,20 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-        $task = Task::find($id);
-        
-        return view('tasks.show', [
-            'task' => $task,
-            ]);
+        $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks();
+            $task = Task::find($id);
+            if ($user->id != $task->user_id) {
+                // return view('welcome', ['tasks' => $tasks]);
+                return redirect('/');
+            }    
+            $data += $this->counts($user);
+            return view('tasks.show', ['task' => $task]);
+        }else {
+            return view('welcome');
+        }
     }
 
     /**

@@ -26,4 +26,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+     public function tasks()
+    {
+        // select * from tasks where user_id == {{$this->id}}
+        return $this->hasMany(Task::class);
+    }
 }
