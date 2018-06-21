@@ -107,11 +107,20 @@ class TasksController extends Controller
      */
     public function edit($id)
     {
-        $task = Task::find($id);
-        
-        return view('tasks.edit', [
-            'task' => $task,
-            ]);
+        $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks();
+            $task = Task::find($id);
+            if ($user->id != $task->user_id) {
+                // return view('welcome', ['tasks' => $tasks]);
+                return redirect('/');
+            }    
+            $data += $this->counts($user);
+            return view('tasks.edit', ['task' => $task]);
+        }else {
+            return view('welcome');
+        }
     }
 
     /**
